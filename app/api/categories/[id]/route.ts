@@ -35,7 +35,7 @@ export async function DELETE(request: Request, { params }: { params: { id: strin
 
     try {
         const client = await clientPromise
-        const db = client.db("haulonme_db")
+        const db = client.db(process.env.DB_NAME)
         await db.collection('categories').deleteOne({ _id: new ObjectId(params.id) })
         return NextResponse.json({ message: "Category deleted successfully" })
     } catch (e) {

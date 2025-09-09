@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     }
 
     const client = await clientPromise
-    const db = client.db("haulonme_db")
+    const db = client.db(process.env.DB_NAME)
     const product = await request.json()
     await db.collection('products').insertOne(product)
     return NextResponse.json(product)

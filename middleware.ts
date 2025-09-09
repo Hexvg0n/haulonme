@@ -1,31 +1,32 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-// FIX: Corrected the typo from 'jos' to 'jose'
 import { jwtVerify } from 'jose'
 
 export async function middleware(request: NextRequest) {
   const sessionToken = request.cookies.get('session_token')?.value;
   const secret = process.env.JWT_SECRET;
 
-  if (!secret) {
-    console.error('JWT_SECRET is not set in environment variables');
-    // In a real app, you might want to return an error response
+  if (!secret || secret.length < 32) {
+    console.error('JWT_SECRET is not set or is not strong enough. It must be at least 32 characters long.');
     return new NextResponse('Internal Server Error', { status: 500 });
   }
 
-  if (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) {
+  const protectedPaths = ['/admin'];
+  const isProtectedPath = protectedPaths.some(p => request.nextUrl.pathname.startsWith(p));
+
+  if (isProtectedPath && !request.nextUrl.pathname.startsWith('/admin/login')) {
     if (!sessionToken) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
 
     try {
-      // Verify the JWT
       await jwtVerify(sessionToken, new TextEncoder().encode(secret));
     } catch (error) {
-      // If the token is invalid, redirect to the login page
       const loginUrl = new URL('/admin/login', request.url);
-      // Clear the invalid cookie
-      loginUrl.searchParams.set('from', request.nextUrl.pathname);
+      const from = request.nextUrl.pathname;
+      if (from && from.startsWith('/')) {
+        loginUrl.searchParams.set('from', from);
+      }
       const response = NextResponse.redirect(loginUrl);
       response.cookies.delete('session_token');
       return response;
@@ -35,10 +36,8 @@ export async function middleware(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith('/admin/login') && sessionToken) {
     try {
       await jwtVerify(sessionToken, new TextEncoder().encode(secret));
-      // If token is valid, redirect to admin dashboard
       return NextResponse.redirect(new URL('/admin', request.url));
     } catch (error) {
-      // If the token is invalid, let them proceed to the login page but clear the bad cookie
       const response = NextResponse.next();
       response.cookies.delete('session_token');
       return response;

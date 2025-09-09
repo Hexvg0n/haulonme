@@ -40,16 +40,10 @@ export function RequestsTable({ requests, onDelete }: RequestsTableProps) {
                   <td className="py-4 px-6 text-sm text-gray-600 max-w-xs truncate" title={request.description}>{request.description}</td>
                   <td className="py-4 px-6 text-sm text-gray-600">
                     {request.referenceLinks ? (
-                      <a 
-                        href={request.referenceLinks.split('\n')[0]} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="text-indigo-600 hover:text-indigo-800 hover:underline flex items-center gap-1"
-                        title={request.referenceLinks}
-                      >
+                      <div className="flex items-center gap-1">
                         <LinkIcon className="h-4 w-4" />
-                        View Link(s)
-                      </a>
+                        <span>{request.referenceLinks.split('\n')[0]}</span>
+                      </div>
                     ) : (
                       <span className="text-gray-400">None</span>
                     )}
