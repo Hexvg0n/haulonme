@@ -12,7 +12,7 @@ const dancingScript = Dancing_Script({
 })
 
 export const metadata: Metadata = {
-  title: "HaulOnMe.net - Fashion Blog",
+  title: "HaulOnMe.com - Fashion Blog",
   description: "Discover the latest fashion trends and affiliate products",
   generator: "v0.app",
 }

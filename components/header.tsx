@@ -29,7 +29,7 @@ export function Header() {
 
           <div className="absolute left-1/2 transform -translate-x-1/2">
             <Link href="/" className="text-3xl font-cursive text-primary animate-spin-3d">
-              HaulOnMe.net
+              HaulOnMe.com
             </Link>
           </div>
 

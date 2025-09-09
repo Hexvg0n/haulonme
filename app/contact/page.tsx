@@ -30,11 +30,11 @@ export default function ContactPage() {
               <CardContent className="text-center">
                 <p className="text-muted-foreground mb-4">Send us an email for any inquiries or support</p>
                 <a
-                  href="mailto:contact@haulonme.net"
+                  href="mailto:contact@haulonme.com"
                   className="inline-flex items-center gap-2 text-accent hover:text-accent/80 transition-colors font-medium"
                 >
                   <Mail className="h-4 w-4" />
-                  contact@haulonme.net
+                  contact@haulonme.com
                 </a>
               </CardContent>
             </Card>
