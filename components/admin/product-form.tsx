@@ -1,5 +1,5 @@
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { X, Save, UploadCloud, Trash2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -14,6 +14,12 @@ interface ProductFormProps {
   categories: Category[]
   onSave: (product: Partial<Product>, imageFiles: File[]) => void
   onCancel: () => void
+}
+
+// A new type to manage the state of each image
+interface ImageState {
+  file?: File;  // The actual file object for new uploads
+  url: string;   // The preview URL (blob for new, server path for existing)
 }
 
 export function ProductForm({ editingProduct, categories, onSave, onCancel }: ProductFormProps) {
@@ -42,26 +48,54 @@ export function ProductForm({ editingProduct, categories, onSave, onCancel }: Pr
       images: [],
     },
   )
-  const [imageFiles, setImageFiles] = useState<File[]>([])
-  const [imagePreviews, setImagePreviews] = useState<string[]>(editingProduct?.images || [])
+  
+  // A unified state for managing all images (new and existing)
+  const [images, setImages] = useState<ImageState[]>(
+    (editingProduct?.images || []).map(url => ({ url }))
+  );
+
+  useEffect(() => {
+    // Cleanup blob URLs on component unmount to prevent memory leaks
+    return () => {
+      images.forEach(image => {
+        if (image.url.startsWith('blob:')) {
+          URL.revokeObjectURL(image.url);
+        }
+      });
+    };
+  }, [images]);
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const files = Array.from(e.target.files)
-      setImageFiles(prev => [...prev, ...files])
-
-      const newPreviews = files.map(file => URL.createObjectURL(file))
-      setImagePreviews(prev => [...prev, ...newPreviews])
+      const files = Array.from(e.target.files);
+      const newImages: ImageState[] = files.map(file => ({
+        file: file,
+        url: URL.createObjectURL(file)
+      }));
+      setImages(prev => [...prev, ...newImages]);
     }
   }
 
-  const removeImage = (index: number) => {
-    setImagePreviews(previews => previews.filter((_, i) => i !== index))
+  const removeImage = (indexToRemove: number) => {
+    const imageToRemove = images[indexToRemove];
+    // If it's a new file, revoke its blob URL to free up memory
+    if (imageToRemove.file) {
+      URL.revokeObjectURL(imageToRemove.url);
+    }
+    setImages(prev => prev.filter((_, i) => i !== indexToRemove));
   }
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    onSave(formData, imageFiles)
+    e.preventDefault();
+    
+    // Separate new files for upload from existing image URLs
+    const newImageFiles = images.map(img => img.file).filter((f): f is File => !!f);
+    const existingImageUrls = images.filter(img => !img.file).map(img => img.url);
+
+    // Update the form data with the correct list of existing images before saving
+    const updatedFormData = { ...formData, images: existingImageUrls };
+
+    onSave(updatedFormData, newImageFiles);
   }
 
   const handleKeywordAdd = (keyword: string) => {
@@ -103,11 +137,11 @@ export function ProductForm({ editingProduct, categories, onSave, onCancel }: Pr
                 <p className="text-xs leading-5 text-gray-600">PNG, JPG, GIF up to 10MB</p>
               </div>
             </div>
-            {imagePreviews.length > 0 && (
+            {images.length > 0 && (
               <div className="mt-4 grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
-                {imagePreviews.map((preview, index) => (
+                {images.map((image, index) => (
                   <div key={index} className="relative">
-                    <img src={preview} alt={`Preview ${index}`} className="h-24 w-24 rounded-md object-cover" />
+                    <img src={image.url} alt={`Preview ${index}`} className="h-24 w-24 rounded-md object-cover" />
                     <Button
                       type="button"
                       size="icon"

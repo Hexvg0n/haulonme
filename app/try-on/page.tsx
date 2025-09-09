@@ -1,28 +1,26 @@
 "use client"
 
 import type React from "react"
-
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Upload, ChevronDown } from "lucide-react"
 import { Header } from "@/components/header"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
-const mockProducts = [
-  { id: "1", name: "Stylish Black Hoodie", image: "/stylish-black-hoodie.png" },
-  { id: "2", name: "Designer White T-Shirt", image: "/designer-white-tshirt.png" },
-  { id: "3", name: "Trendy Baseball Cap", image: "/trendy-baseball-cap.png" },
-  { id: "4", name: "Luxury Sneakers", image: "/luxury-sneakers.png" },
-  { id: "5", name: "Vintage Denim Jacket", image: "/vintage-denim-jacket.png" },
-  { id: "6", name: "Minimalist Watch", image: "/minimalist-watch.png" },
-]
+import type { Product } from "@/types"
 
 export default function TryOnPage() {
+  const [products, setProducts] = useState<Product[]>([])
   const [selectedProduct, setSelectedProduct] = useState("")
   const [uploadedImage, setUploadedImage] = useState<string | null>(null)
   const [isDropdownOpen, setIsDropdownOpen] = useState(false)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generatedResult, setGeneratedResult] = useState<string | null>(null)
+
+  useEffect(() => {
+    fetch('/api/products')
+      .then(res => res.json())
+      .then(data => setProducts(data))
+  }, [])
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0]
@@ -46,7 +44,7 @@ export default function TryOnPage() {
     }, 3000)
   }
 
-  const selectedProductData = mockProducts.find((p) => p.id === selectedProduct)
+  const selectedProductData = products.find((p) => p.id === selectedProduct)
 
   return (
     <div className="min-h-screen bg-background">
@@ -125,7 +123,7 @@ export default function TryOnPage() {
 
                     {isDropdownOpen && (
                       <div className="absolute top-full left-0 right-0 mt-1 bg-card border border-border rounded-lg shadow-lg z-10 max-h-60 overflow-y-auto">
-                        {mockProducts.map((product) => (
+                        {products.map((product) => (
                           <button
                             key={product.id}
                             onClick={() => {
@@ -194,7 +192,6 @@ export default function TryOnPage() {
             </div>
           </div>
 
-          {/* Disclaimer */}
           <div className="mt-12 text-center">
             <p className="text-sm text-muted-foreground">
               This is a conceptual AI feature. Results are for demonstration purposes only.

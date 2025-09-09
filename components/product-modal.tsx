@@ -4,30 +4,7 @@ import { useState } from "react"
 import { X, Star, Award, Zap, Heart } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-
-interface Product {
-  id: string
-  image: string
-  images?: string[]
-  affiliateLink: string
-  category: string
-  subCategory: string
-  review: string
-  rating?: string
-  justification?: string
-  keywords: string[]
-  brand?: string
-  material?: string
-  fit?: string
-  season?: string
-  price?: string
-  originalPrice?: string
-  discount?: string
-  sizes?: string[]
-  colors?: string[]
-  careInstructions?: string[]
-  features?: string[]
-}
+import type { Product } from "@/types" // Import the shared type
 
 interface ProductModalProps {
   product: Product

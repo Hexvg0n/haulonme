@@ -1,12 +1,12 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Header } from "@/components/header"
 
 export default function PhotoRequestPage() {
   const [formData, setFormData] = useState({
@@ -17,24 +17,38 @@ export default function PhotoRequestPage() {
     description: "",
     referenceLinks: "",
   })
+  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission here
-    console.log("Photo request submitted:", formData)
-    alert("Thank you for your request! We'll review it and get back to you soon.")
-    setFormData({
-      name: "",
-      email: "",
-      category: "",
-      itemName: "",
-      description: "",
-      referenceLinks: "",
-    })
+    setIsSubmitting(true)
+    
+    const response = await fetch('/api/requests', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(formData),
+    });
+
+    if (response.ok) {
+        alert("Thank you for your request! We'll review it and get back to you soon.")
+        setFormData({
+            name: "",
+            email: "",
+            category: "",
+            itemName: "",
+            description: "",
+            referenceLinks: "",
+        })
+    } else {
+        alert("Sorry, there was an error submitting your request. Please try again.")
+    }
+    setIsSubmitting(false)
   }
 
   return (
     <div className="min-h-screen bg-background">
+      <Header />
+      <main className="pt-20">
       <div className="container mx-auto px-4 py-16">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-12">
@@ -119,12 +133,13 @@ export default function PhotoRequestPage() {
               />
             </div>
 
-            <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
-              Submit Photo Request
+            <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground" disabled={isSubmitting}>
+              {isSubmitting ? "Submitting..." : "Submit Photo Request"}
             </Button>
           </form>
         </div>
       </div>
+      </main>
     </div>
   )
 }

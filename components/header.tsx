@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { Menu, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -19,7 +20,9 @@ export function Header() {
           </Button>
 
           <div className="absolute left-1/2 transform -translate-x-1/2">
-            <h1 className="text-3xl font-cursive text-primary animate-spin-3d">HaulOnMe.net</h1>
+            <Link href="/" className="text-3xl font-cursive text-primary animate-spin-3d">
+              HaulOnMe.net
+            </Link>
           </div>
 
           {/* Search Bar */}
@@ -52,36 +55,9 @@ export function Header() {
 
               {/* Navigation Links */}
               <div className="space-y-6">
-                <div>
-                  <h3 className="text-lg font-semibold text-primary mb-3">Categories</h3>
-                  <div className="space-y-2 ml-4">
-                    <a
-                      href="/category/hoodies"
-                      className="block text-muted-foreground hover:text-accent transition-colors"
-                    >
-                      Hoodies
-                    </a>
-                    <a
-                      href="/category/t-shirts"
-                      className="block text-muted-foreground hover:text-accent transition-colors"
-                    >
-                      T-Shirts
-                    </a>
-                    <a
-                      href="/category/caps"
-                      className="block text-muted-foreground hover:text-accent transition-colors"
-                    >
-                      Caps
-                    </a>
-                    <a
-                      href="/category/shoes"
-                      className="block text-muted-foreground hover:text-accent transition-colors"
-                    >
-                      Shoes
-                    </a>
-                  </div>
-                </div>
-
+                 <a href="/" className="block text-lg text-primary hover:text-accent transition-colors">
+                  Collection
+                </a>
                 <a href="/where-to-buy" className="block text-lg text-primary hover:text-accent transition-colors">
                   Where to buy
                 </a>

@@ -3,16 +3,7 @@
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ProductModal } from "./product-modal"
-
-interface Product {
-  id: string
-  image: string
-  affiliateLink: string
-  category: string
-  subCategory: string
-  review: string
-  keywords: string[]
-}
+import type { Product } from "@/types"
 
 interface ProductGridProps {
   products: Product[]
@@ -25,7 +16,7 @@ export function ProductGrid({ products }: ProductGridProps) {
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
         {products.map((product) => (
-          <div key={product.id} className="group">
+          <div key={product._id?.toString()} className="group">
             <div
               className="relative overflow-hidden rounded-lg bg-card cursor-pointer transform transition-all duration-300 hover:scale-105 hover:shadow-lg"
               onClick={() => setSelectedProduct(product)}

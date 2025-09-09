@@ -1,179 +1,49 @@
 "use client"
 
 import { Header } from "@/components/header"
-import { useState } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { ProductModal } from "@/components/product-modal"
-
-const mockProducts = [
-  {
-    id: "1",
-    image: "/stylish-black-hoodie.png",
-    images: ["/stylish-black-hoodie.png", "/premium-black-hoodie.png"],
-    affiliateLink: "https://example.com/product1",
-    category: "hoodies",
-    subCategory: "best-batch",
-    brand: "Balenciaga",
-    material: "100% Cotton Fleece",
-    fit: "Oversized",
-    season: "Fall/Winter",
-    price: "$89",
-    originalPrice: "$120",
-    discount: "25%",
-    sizes: ["S", "M", "L", "XL"],
-    colors: ["Black", "White", "Gray"],
-    features: ["Premium Cotton", "Oversized Fit", "Screen Print Logo", "Kangaroo Pocket"],
-    careInstructions: ["Machine wash cold", "Tumble dry low", "Do not bleach", "Iron on low heat"],
-    review:
-      "BALENCIAGA PARIS HOODIE: Very nice smooth material, well made, print done very nicely. The oversized fit is perfect for the streetwear aesthetic and the quality feels premium throughout. The cotton fleece is incredibly soft and the construction is solid.",
-    rating: "9/10",
-    justification:
-      "The hoodie is slightly long, but that's a sizing issue - I recommend going one size smaller for the perfect fit. The quality justifies the price point.",
-    keywords: ["balenciaga", "paris", "hoodie", "black", "oversized"],
-  },
-  {
-    id: "2",
-    image: "/designer-white-tshirt.png",
-    images: ["/designer-white-tshirt.png", "/casual-blue-tshirt.png"],
-    affiliateLink: "https://example.com/product2",
-    category: "t-shirts",
-    subCategory: "budget-batch",
-    brand: "Essentials",
-    material: "Cotton Blend",
-    fit: "Regular",
-    season: "All Season",
-    price: "$25",
-    originalPrice: "$35",
-    discount: "30%",
-    sizes: ["S", "M", "L", "XL"],
-    colors: ["White"],
-    features: ["Breathable Fabric", "Classic Fit", "Reinforced Seams"],
-    careInstructions: ["Machine wash warm", "Tumble dry medium", "Iron if needed"],
-    review:
-      "ESSENTIAL WHITE TEE: Perfect basic white tee that works as a foundation piece. The cotton blend is soft and breathable, making it ideal for layering or wearing alone. Great value for the price point and the fit is consistent.",
-    rating: "8/10",
-    justification:
-      "Excellent quality for a budget option, though the fit could be slightly more tailored around the waist. Still a solid wardrobe staple.",
-    keywords: ["essentials", "white", "tee", "basic", "cotton"],
-  },
-  {
-    id: "3",
-    image: "/trendy-baseball-cap.png",
-    affiliateLink: "https://example.com/product3",
-    category: "caps",
-    subCategory: "random",
-    brand: "Unknown",
-    material: "Cotton",
-    fit: "Adjustable",
-    season: "All Season",
-    price: "$15",
-    originalPrice: "$20",
-    discount: "25%",
-    sizes: ["One Size"],
-    colors: ["Black"],
-    features: ["Clean Design", "Adjustable Strap", "Versatile"],
-    careInstructions: ["Machine wash cold", "Iron if needed"],
-    review:
-      "MINIMALIST BLACK CAP: Clean, minimalist design that complements any outfit. The adjustable strap ensures a perfect fit and the material feels durable. A versatile piece that works with both casual and elevated streetwear looks.",
-    rating: "8.5/10",
-    justification:
-      "Great overall quality and design, minor points deducted for the slightly stiff brim that needs breaking in.",
-    keywords: ["cap", "baseball", "streetwear", "adjustable", "cotton"],
-  },
-  {
-    id: "4",
-    image: "/luxury-sneakers.png",
-    affiliateLink: "https://example.com/product4",
-    category: "shoes",
-    subCategory: "best-batch",
-    brand: "Unknown",
-    material: "Leather and Synthetic",
-    fit: "Comfortable",
-    season: "All Season",
-    price: "$150",
-    originalPrice: "$200",
-    discount: "25%",
-    sizes: ["S", "M", "L", "XL"],
-    colors: ["Cloud White"],
-    features: ["Premium Materials", "Comfortable Fit", "Versatile Design"],
-    careInstructions: ["Wipe clean with a damp cloth", "Avoid prolonged exposure to direct sunlight"],
-    review:
-      "CLOUD WHITE SNEAKERS: These sneakers are incredibly comfortable with premium materials throughout. The cloud white colorway is versatile and the comfort level is unmatched for all-day wear. Perfect for both casual and semi-formal occasions.",
-    rating: "9.5/10",
-    justification:
-      "Nearly perfect sneakers with exceptional comfort and style. Only minor issue is they show dirt easily due to the white colorway.",
-    keywords: ["sneakers", "luxury", "comfortable", "versatile", "premium"],
-  },
-  {
-    id: "5",
-    image: "/vintage-denim-jacket.png",
-    affiliateLink: "https://example.com/product5",
-    category: "hoodies",
-    subCategory: "budget-batch",
-    brand: "Fog",
-    material: "Denim",
-    fit: "Relaxed",
-    season: "Fall/Winter",
-    price: "$50",
-    originalPrice: "$70",
-    discount: "30%",
-    sizes: ["S", "M", "L", "XL"],
-    colors: ["Vintage Wash"],
-    features: ["Vintage Wash", "Relaxed Fit", "Layering"],
-    careInstructions: ["Machine wash cold", "Do not bleach", "Iron on low heat"],
-    review:
-      "FOG ESSENTIALS HOODIE: Great alternative to the more expensive options. The vintage wash gives it character and the fit is relaxed but not oversized. Perfect for layering and the price point makes it accessible.",
-    rating: "7.5/10",
-    justification:
-      "Good quality for the price, but the material isn't as premium as higher-tier options. Still a solid choice for budget-conscious buyers.",
-    keywords: ["fog", "essentials", "vintage", "casual", "layering"],
-  },
-  {
-    id: "6",
-    image: "/minimalist-watch.png",
-    affiliateLink: "https://example.com/product6",
-    category: "accessories",
-    subCategory: "best-batch",
-    brand: "Unknown",
-    material: "Metal and Leather",
-    fit: "One Size",
-    season: "All Season",
-    price: "$40",
-    originalPrice: "$50",
-    discount: "20%",
-    sizes: ["One Size"],
-    colors: ["Black"],
-    features: ["Vintage Wash", "Minimalist Design", "Excellent Quality"],
-    careInstructions: ["Wipe clean with a damp cloth", "Avoid water"],
-    review:
-      "VINTAGE BLACK TEE: Love the vintage wash on this piece. The fit is perfect for a relaxed, effortless look and the quality of the cotton is excellent. The faded black color adds character and works well with various outfit combinations.",
-    rating: "8/10",
-    justification:
-      "Great vintage aesthetic and quality, though the sizing runs slightly large so consider going one size down.",
-    keywords: ["vintage", "black", "tee", "wash", "cotton"],
-  },
-]
-
-const categories = [
-  { id: "all", label: "All Items" },
-  { id: "hoodies", label: "Hoodies" },
-  { id: "t-shirts", label: "T-Shirts" },
-  { id: "caps", label: "Caps" },
-  { id: "shoes", label: "Shoes" },
-  { id: "accessories", label: "Accessories" },
-]
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import type { Product, Category } from "@/types"
 
 export default function HomePage() {
+  const [products, setProducts] = useState<Product[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
-  const [selectedProduct, setSelectedProduct] = useState<(typeof mockProducts)[0] | null>(null)
+  const [sortOption, setSortOption] = useState("newest")
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
 
-  const filteredProducts = mockProducts.filter((product) => {
-    const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
-    const matchesSearch =
-      searchQuery === "" ||
-      product.keywords.some((keyword) => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
-    return matchesCategory && matchesSearch
-  })
+  useEffect(() => {
+    fetch('/api/products').then(res => res.json()).then(setProducts)
+    fetch('/api/categories').then(res => res.json()).then(setCategories)
+  }, [])
+
+  const filteredAndSortedProducts = useMemo(() => {
+    // 1. Filtering
+    let filtered = products.filter((product) => {
+      const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+      const matchesSearch =
+        searchQuery === "" ||
+        product.keywords.some((keyword) => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
+      return matchesCategory && matchesSearch
+    });
+
+    // 2. Sorting
+    const sorted = [...filtered].sort((a, b) => {
+        switch (sortOption) {
+            case 'price-asc':
+                return (parseFloat(a.price?.replace('$', '') || '0')) - (parseFloat(b.price?.replace('$', '') || '0'));
+            case 'price-desc':
+                return (parseFloat(b.price?.replace('$', '') || '0')) - (parseFloat(a.price?.replace('$', '') || '0'));
+            case 'newest':
+            default:
+                return new Date(b.created).getTime() - new Date(a.created).getTime();
+        }
+    });
+
+    return sorted;
+  }, [products, selectedCategory, searchQuery, sortOption]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -217,30 +87,51 @@ export default function HomePage() {
 
           {/* Category Filters */}
           <div className="flex flex-wrap justify-center gap-2 mb-8">
-            {categories.map((category) => (
-              <button
-                key={category.id}
-                onClick={() => setSelectedCategory(category.id)}
+            <button
+                key="all"
+                onClick={() => setSelectedCategory("all")}
                 className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
-                  selectedCategory === category.id
+                  selectedCategory === "all"
                     ? "bg-foreground text-background"
                     : "bg-muted text-muted-foreground hover:bg-muted/80"
                 }`}
               >
-                {category.label}
+                All Items
+              </button>
+            {categories.map((category) => (
+              <button
+                key={category._id?.toString()}
+                onClick={() => setSelectedCategory(category.key)}
+                className={`px-6 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                  selectedCategory === category.key
+                    ? "bg-foreground text-background"
+                    : "bg-muted text-muted-foreground hover:bg-muted/80"
+                }`}
+              >
+                {category.name}
               </button>
             ))}
           </div>
 
-          {/* Results Count */}
-          <div className="text-center mb-8">
-            <p className="text-muted-foreground">{filteredProducts.length} items found</p>
+          {/* Results Count and Sorting Dropdown */}
+          <div className="flex justify-between items-center text-center mb-8">
+            <p className="text-muted-foreground">{filteredAndSortedProducts.length} items found</p>
+            <Select value={sortOption} onValueChange={setSortOption}>
+                <SelectTrigger className="w-[180px]">
+                    <SelectValue placeholder="Sort by" />
+                </SelectTrigger>
+                <SelectContent>
+                    <SelectItem value="newest">Newest</SelectItem>
+                    <SelectItem value="price-asc">Price: Low to High</SelectItem>
+                    <SelectItem value="price-desc">Price: High to Low</SelectItem>
+                </SelectContent>
+            </Select>
           </div>
 
           {/* Product Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {filteredProducts.map((product) => (
-              <div key={product.id} className="group">
+            {filteredAndSortedProducts.map((product) => (
+              <div key={product._id?.toString()} className="group">
                 <div className="bg-muted/30 rounded-2xl p-8 mb-4 aspect-square flex items-center justify-center overflow-hidden">
                   <img
                     src={product.image || "/placeholder.svg"}
