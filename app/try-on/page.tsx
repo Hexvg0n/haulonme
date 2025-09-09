@@ -48,7 +48,7 @@ export default function TryOnPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <Header />
+      <Header/>
 
       <main className="pt-20">
         <div className="max-w-6xl mx-auto px-6 py-12">
@@ -199,6 +199,11 @@ export default function TryOnPage() {
           </div>
         </div>
       </main>
+
+      {/* SOON Overlay */}
+      <div className="fixed inset-0 w-screen h-screen bg-black/50 z-40 flex items-center justify-center">
+        <h2 className="text-9xl font-bold text-white -rotate-12">SOON!</h2>
+      </div>
     </div>
   )
 }
