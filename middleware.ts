@@ -1,31 +1,51 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
+// FIX: Corrected the typo from 'jos' to 'jose'
+import { jwtVerify } from 'jose'
 
-export function middleware(request: NextRequest) {
-  // Clone the request headers so we can set a new one
-  const headers = new Headers(request.headers);
-  headers.set('x-current-path', request.nextUrl.pathname);
+export async function middleware(request: NextRequest) {
+  const sessionToken = request.cookies.get('session_token')?.value;
+  const secret = process.env.JWT_SECRET;
 
-  // Check for a session token in the cookies
-  const sessionToken = request.cookies.get('session_token');
+  if (!secret) {
+    console.error('JWT_SECRET is not set in environment variables');
+    // In a real app, you might want to return an error response
+    return new NextResponse('Internal Server Error', { status: 500 });
+  }
 
-  // If the user is trying to access the admin area without a session, redirect to login
   if (request.nextUrl.pathname.startsWith('/admin') && !request.nextUrl.pathname.startsWith('/admin/login')) {
     if (!sessionToken) {
       return NextResponse.redirect(new URL('/admin/login', request.url));
     }
+
+    try {
+      // Verify the JWT
+      await jwtVerify(sessionToken, new TextEncoder().encode(secret));
+    } catch (error) {
+      // If the token is invalid, redirect to the login page
+      const loginUrl = new URL('/admin/login', request.url);
+      // Clear the invalid cookie
+      loginUrl.searchParams.set('from', request.nextUrl.pathname);
+      const response = NextResponse.redirect(loginUrl);
+      response.cookies.delete('session_token');
+      return response;
+    }
   }
 
-  // If the user is logged in and tries to visit the login page, redirect to the admin dashboard
   if (request.nextUrl.pathname.startsWith('/admin/login') && sessionToken) {
-    return NextResponse.redirect(new URL('/admin', request.url));
+    try {
+      await jwtVerify(sessionToken, new TextEncoder().encode(secret));
+      // If token is valid, redirect to admin dashboard
+      return NextResponse.redirect(new URL('/admin', request.url));
+    } catch (error) {
+      // If the token is invalid, let them proceed to the login page but clear the bad cookie
+      const response = NextResponse.next();
+      response.cookies.delete('session_token');
+      return response;
+    }
   }
 
-  return NextResponse.next({
-    request: {
-      headers,
-    },
-  });
+  return NextResponse.next();
 }
 
 export const config = {
