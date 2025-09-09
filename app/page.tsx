@@ -6,10 +6,18 @@ import { ProductModal } from "@/components/product-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Product, Category } from "@/types"
 
+const subCategories = [
+    { id: "all", label: "All Batches" },
+    { id: "best-batch", label: "Best Batch" },
+    { id: "budget-batch", label: "Budget Batch" },
+    { id: "random", label: "Random" },
+]
+
 export default function HomePage() {
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState("all")
+  const [selectedSubCategory, setSelectedSubCategory] = useState("all")
   const [searchQuery, setSearchQuery] = useState("")
   const [sortOption, setSortOption] = useState("newest")
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
@@ -20,16 +28,15 @@ export default function HomePage() {
   }, [])
 
   const filteredAndSortedProducts = useMemo(() => {
-    // 1. Filtering
     let filtered = products.filter((product) => {
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory
+      const matchesSubCategory = selectedSubCategory === "all" || product.subCategory === selectedSubCategory
       const matchesSearch =
         searchQuery === "" ||
         product.keywords.some((keyword) => keyword.toLowerCase().includes(searchQuery.toLowerCase()))
-      return matchesCategory && matchesSearch
+      return matchesCategory && matchesSubCategory && matchesSearch
     });
 
-    // 2. Sorting
     const sorted = [...filtered].sort((a, b) => {
         switch (sortOption) {
             case 'price-asc':
@@ -43,7 +50,7 @@ export default function HomePage() {
     });
 
     return sorted;
-  }, [products, selectedCategory, searchQuery, sortOption]);
+  }, [products, selectedCategory, selectedSubCategory, searchQuery, sortOption]);
 
   return (
     <div className="min-h-screen bg-background">
@@ -51,14 +58,12 @@ export default function HomePage() {
 
       <main className="pt-20 pb-16">
         <div className="max-w-6xl mx-auto px-4">
-          {/* Hero Section */}
           <div className="text-center mb-12">
             <h1 className="text-4xl font-bold text-foreground mb-4">Fashion Collection</h1>
             <p className="text-muted-foreground text-lg mb-8">
               Discover curated fashion pieces with detailed reviews and affiliate links.
             </p>
 
-            {/* Search Bar */}
             <div className="max-w-md mx-auto mb-8">
               <div className="relative">
                 <input
@@ -86,7 +91,7 @@ export default function HomePage() {
           </div>
 
           {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-2 mb-8">
+          <div className="flex flex-wrap justify-center gap-2 mb-4">
             <button
                 key="all"
                 onClick={() => setSelectedCategory("all")}
@@ -112,8 +117,24 @@ export default function HomePage() {
               </button>
             ))}
           </div>
+          
+          {/* Sub-Category (Batch) Filters */}
+          <div className="flex flex-wrap justify-center gap-2 mb-8 border-b pb-8 border-border">
+            {subCategories.map((subCategory) => (
+              <button
+                key={subCategory.id}
+                onClick={() => setSelectedSubCategory(subCategory.id)}
+                className={`px-4 py-1.5 rounded-full text-xs font-medium transition-all duration-200 ${
+                  selectedSubCategory === subCategory.id
+                    ? "bg-secondary text-secondary-foreground"
+                    : "bg-muted/50 text-muted-foreground hover:bg-muted"
+                }`}
+              >
+                {subCategory.label}
+              </button>
+            ))}
+          </div>
 
-          {/* Results Count and Sorting Dropdown */}
           <div className="flex justify-between items-center text-center mb-8">
             <p className="text-muted-foreground">{filteredAndSortedProducts.length} items found</p>
             <Select value={sortOption} onValueChange={setSortOption}>
@@ -128,7 +149,6 @@ export default function HomePage() {
             </Select>
           </div>
 
-          {/* Product Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredAndSortedProducts.map((product) => (
               <div key={product._id?.toString()} className="group">
