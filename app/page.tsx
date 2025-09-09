@@ -5,7 +5,7 @@ import { useState, useEffect, useMemo } from "react"
 import { ProductModal } from "@/components/product-modal"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type { Product, Category } from "@/types"
-
+import { useSearchParams } from "next/navigation";
 const subCategories = [
     { id: "all", label: "All Batches" },
     { id: "best-batch", label: "Best Batch" },
@@ -14,6 +14,7 @@ const subCategories = [
 ]
 
 export default function HomePage() {
+  const searchParams = useSearchParams();
   const [products, setProducts] = useState<Product[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [selectedCategory, setSelectedCategory] = useState("all")
@@ -27,6 +28,12 @@ export default function HomePage() {
     fetch('/api/categories').then(res => res.json()).then(setCategories)
   }, [])
 
+  useEffect(() => {
+    const urlSearch = searchParams.get('search');
+    if (urlSearch) {
+        setSearchQuery(urlSearch);
+    }
+  }, [searchParams]);
   const filteredAndSortedProducts = useMemo(() => {
     let filtered = products.filter((product) => {
       const matchesCategory = selectedCategory === "all" || product.category === selectedCategory

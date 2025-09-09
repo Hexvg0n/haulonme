@@ -4,12 +4,20 @@ import { useState } from "react"
 import { Menu, X, Search } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const router = useRouter();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen)
 
+  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      const query = e.currentTarget.value;
+      router.push(`/?search=${encodeURIComponent(query)}`);
+    }
+  }
   return (
     <>
       <header className="fixed top-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
@@ -31,6 +39,7 @@ export function Header() {
             <input
               type="text"
               placeholder="Search..."
+              onKeyDown={handleSearch}
               className="pl-10 pr-4 py-2 w-64 bg-background border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-accent focus:border-transparent"
             />
           </div>

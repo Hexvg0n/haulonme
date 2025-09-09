@@ -1,31 +1,21 @@
 import clientPromise from '@/lib/mongodb'
+import { ObjectId } from 'mongodb'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
-export async function GET() {
-  try {
-    const client = await clientPromise
-    const db = client.db("haulonme_db")
-    const requests = await db.collection('photo_requests').find({}).sort({ createdAt: -1 }).toArray()
-    return NextResponse.json(requests)
-  } catch (e) {
-    console.error(e)
-    return NextResponse.json({ error: "Error fetching requests" }, { status: 500 })
-  }
-}
-
-export async function POST(request: Request) {
-  try {
-    const client = await clientPromise
-    const db = client.db("haulonme_db")
-    const requestData = await request.json()
-    const newRequest = {
-        ...requestData,
-        createdAt: new Date(),
+export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    const sessionToken = cookies().get('session_token')?.value
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
-    await db.collection('photo_requests').insertOne(newRequest)
-    return NextResponse.json(newRequest, { status: 201 })
-  } catch(e) {
-    console.error(e)
-    return NextResponse.json({ error: "Error creating request" }, { status: 500 })
-  }
+
+    try {
+        const client = await clientPromise
+        const db = client.db(process.env.DB_NAME)
+        await db.collection('photo_requests').deleteOne({ _id: new ObjectId(params.id) })
+        return NextResponse.json({ message: "Request deleted successfully" })
+    } catch (e) {
+        console.error(e)
+        return NextResponse.json({ error: "Error deleting request" }, { status: 500 })
+    }
 }

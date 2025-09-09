@@ -1,14 +1,19 @@
 import clientPromise from '@/lib/mongodb'
 import { ObjectId } from 'mongodb'
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 
 export async function PUT(request: Request, { params }: { params: { id: string } }) {
+    const sessionToken = cookies().get('session_token')?.value
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     try {
         const client = await clientPromise
-        const db = client.db("haulonme_db")
+        const db = client.db(process.env.DB_NAME)
         const categoryData = await request.json()
         
-        // Remove the immutable _id field before updating
         delete categoryData._id
 
         await db.collection('categories').updateOne(
@@ -23,6 +28,11 @@ export async function PUT(request: Request, { params }: { params: { id: string }
 }
 
 export async function DELETE(request: Request, { params }: { params: { id: string } }) {
+    const sessionToken = cookies().get('session_token')?.value
+    if (!sessionToken) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+
     try {
         const client = await clientPromise
         const db = client.db("haulonme_db")

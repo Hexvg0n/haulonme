@@ -2,12 +2,13 @@ import clientPromise from '@/lib/mongodb';
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
+import crypto from 'crypto';
 
 export async function POST(request: Request) {
   try {
     const { username, password } = await request.json();
     const client = await clientPromise;
-    const db = client.db("haulonme_db");
+    const db = client.db(process.env.DB_NAME)
     
     const user = await db.collection('users').findOne({ username });
 
@@ -21,8 +22,9 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
     }
     
-    // Set a session cookie upon successful login
-    const sessionToken = "user-is-logged-in"; // In a real-world app, use a secure, random token
+    // Create a secure, random session token
+    const sessionToken = crypto.randomBytes(32).toString('hex');
+    
     cookies().set('session_token', sessionToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',

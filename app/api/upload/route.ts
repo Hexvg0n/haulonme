@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server'
 import { writeFile, mkdir } from 'fs/promises'
 import path from 'path'
 
+const ALLOWED_FILE_TYPES = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
 export async function POST(request: Request) {
   try {
     const data = await request.formData()
@@ -14,27 +17,23 @@ export async function POST(request: Request) {
     const uploadedFilePaths = []
     const uploadDir = path.join(process.cwd(), 'public/uploads')
 
-    // Ensure the upload directory exists
-    try {
-      await mkdir(uploadDir, { recursive: true })
-    } catch (error: any) {
-      if (error.code !== 'EEXIST') {
-        console.error('Error creating upload directory:', error)
-        return NextResponse.json({ success: false, message: 'Could not create upload directory' }, { status: 500 })
-      }
-    }
+    await mkdir(uploadDir, { recursive: true });
 
     for (const file of files) {
-      const bytes = await file.arrayBuffer()
-      // Create a Uint8Array directly from the ArrayBuffer
-      const buffer = new Uint8Array(bytes)
+      // Validate file type
+      if (!ALLOWED_FILE_TYPES.includes(file.type)) {
+          return NextResponse.json({ success: false, message: `File type not supported: ${file.type}` }, { status: 400 });
+      }
+      // Validate file size
+      if (file.size > MAX_FILE_SIZE) {
+          return NextResponse.json({ success: false, message: `File size exceeds the 10MB limit.` }, { status: 400 });
+      }
 
+      const bytes = await file.arrayBuffer()
+      const buffer = new Uint8Array(bytes)
       const filename = `${Date.now()}-${file.name}`
       const filePath = path.join(uploadDir, filename)
-
-      // Write the file to the filesystem
       await writeFile(filePath, buffer)
-
       uploadedFilePaths.push(`/uploads/${filename}`)
     }
 
