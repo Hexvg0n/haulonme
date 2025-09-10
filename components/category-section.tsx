@@ -2,16 +2,7 @@
 
 import { useState } from "react"
 import { ProductGrid } from "./product-grid"
-
-interface Product {
-  id: string
-  image: string
-  affiliateLink: string
-  category: string
-  subCategory: string
-  review: string
-  keywords: string[]
-}
+import type { Product } from "@/types"
 
 interface CategorySectionProps {
   title: string
